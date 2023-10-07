@@ -1,12 +1,11 @@
+import { errorsMidleware } from './middlewares/errorsMiddleware.js';
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import mongoose from 'mongoose'
 import { Server } from 'socket.io'
 import http from 'http'
 import ChatModel from './models/ChatModel.js'
-import { rooms } from './data/rooms.js'
 import { dbConnect } from './services/dbConnect.js'
 
 // routes
@@ -14,16 +13,16 @@ import { globalRouter, authRouter, roomsRouter, privatsRouter, userRouter } from
 
 dotenv.config()
 const app = express()
-// ... (використання middleware)
 
 // Load environment variables
 const PORT = process.env.SERVER_PORT || 8080
-
 const startupDevMode = app.get('env') === 'development'
 const formatsLogger = startupDevMode ? 'dev' : 'short'
 const clientURL = startupDevMode ? process.env.TEST_URL : process.env.CLIENT_URL
 
 dbConnect()
+
+// ... (використання middleware)
 
 // Set up the express application
 app.use(bodyParser.json({ limit: '30mb', extended: true }))
@@ -45,6 +44,9 @@ app.use('/auth', authRouter)
 app.use('/rooms', roomsRouter)
 app.use('/private', privatsRouter)
 app.use('/user', userRouter)
+
+// Necessary to resolve server crash when an error occurs
+app.use(errorsMidleware);
 
 const httpServer = http.createServer(app)
 const io = new Server(httpServer, {
