@@ -8,7 +8,7 @@ async function signup(req, res) {
 
   if (Object.keys(req.body).length === 0) throw ApiError.BadRequest("Empty body of request.");
 
-  if (userName.trim().length < 2 && userName.trim().length >= 20) throw ApiError.NotValidData("The name must have at least 2 characters and 20 less.");
+  if (userName.trim().length < 2 || userName.trim().length >= 20) throw ApiError.NotValidData("The name must have at least 2 characters and 20 less.");
 
   if (!userMood || !validMood.includes(userMood)) throw ApiError.NotValidData("No Mood selected");
 
