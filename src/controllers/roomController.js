@@ -1,7 +1,14 @@
-import { rooms } from '../data/rooms.js'
+import { Rooms } from '../models/rooms.js'
 import ChatModel from '../models/ChatModel.js'
 
 const GetRooms = async (req, res) => {
+	let rooms = await Rooms.find().exec();
+
+	rooms = rooms
+			.map(({ id, title, image, description }) => (
+				{ id, title, image, description }
+			));
+			
 	try {
 		res.status(200).json(rooms)
 	} catch (error) {

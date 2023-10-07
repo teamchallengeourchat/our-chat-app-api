@@ -8,7 +8,7 @@ const roomsSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
-    name: {
+    id: {
       type: String,
       default: "",
       required: true,
