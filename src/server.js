@@ -57,8 +57,6 @@ const io = new Server(httpServer, {
 })
 
 let activeUsers = []
-let addedUserInCurrentChat = []
-const username = 'lesoRoman'
 
 io.on('connection', socket => {
 	console.log('New User Connected', socket.id)
@@ -76,43 +74,39 @@ io.on('connection', socket => {
 		console.log('get-curent-chatRoom', userName)
 		io.emit('user-added-in-chatRoom', userName)
 	})
-	socket.on('get-curent-chatRoom', async chat_id => {
-		console.log('get-curent-chatRoom', chat_id)
-
-		if (chat_id === 'undefined' && chat_id === 'null') {
-			console.error('chat_id is not defined')
-			return
-		}
-
+	socket.on('get-curent-chatRoom', async (chat_id, userId) => {
 		try {
-			let newChatRoom = null
-			const chatRoom = await ChatModel.findById(chat_id)
-			newChatRoom = chatRoom
-			io.emit('get-chatRoom', newChatRoom)
+			const chatRoom = await ChatModel.findOne({ id: chat_id })
+			if (!chatRoom) {
+				const newChatRoom = new ChatModel({
+					id: chat_id,
+					members: [userId],
+					messages: [],
+				})
+				await newChatRoom.save()
+				io.emit('get-chatRoom', newChatRoom)
+			} else {
+				io.emit('get-chatRoom', chatRoom)
+			}
 		} catch (error) {
 			console.error("Error while processing 'get-curent-chatRoom':", error)
 		}
 	})
 	socket.on('send-message', async ({ text, senderId, chatId, userName, userMood }) => {
 		try {
-			const chatRoom = await ChatModel.findById(chatId)
+			const chatRoom = await ChatModel.findOne({id: chatId})
 
 			if (chatRoom) {
-				chatRoom.messages.push({ text, senderId, chatId, userName, userMood, createdAt: Date.now() })
+				chatRoom.messages.push({ text, senderId, chatId, userName, userMood })
 				await chatRoom.save()
 			}
 		} catch (error) {
 			console.error("Error while processing 'get-curent-chatRoom':", error)
 		}
 
-		// socket.emit('receive-message', data)
-		// socket.broadcast.emit('receive-message', data);
-		// socket.emit('receive-message', data);
-
-		const upDatedChat = await ChatModel.findById(chatId)
+		const upDatedChat = await ChatModel.findOne({ id: chatId })
 		activeUsers.forEach(element => {
-			console.log('--------------', upDatedChat.messages[upDatedChat.messages.length - 1])
-			io.to(element.socketId).emit('receive-message', upDatedChat.messages[upDatedChat.messages.length - 1])
+			io.to(element.socketId).emit('receive-message', upDatedChat.messages.at(-1))
 		})
 	})
 	socket.on('disconnect', () => {
