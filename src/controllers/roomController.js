@@ -25,7 +25,7 @@ const GetRoomById = async (req, res) => {
 
 	try {
 		let newChatRoom = null
-		const chatRoom = await ChatModel.findById(id)
+		const chatRoom = await ChatModel.findOne({ id });
 		newChatRoom = chatRoom
 		res.status(200).json(newChatRoom)
 	} catch (error) {
