@@ -1,6 +1,6 @@
 // import { Rooms } from '../models/rooms.js'
-import ChatModel from "../models/ChatModel.js"
-import Message from "../models/Message.js"
+import { ChatModel } from "../models/ChatModel.js"
+import { Message } from "../models/Message.js"
 import { User } from "../models/user.js"
 
 export default async function (io) {
@@ -22,24 +22,25 @@ export default async function (io) {
 				const chatRoom = await ChatModel.findOne({ id: chat_id })
 
 				if (!chatRoom) {
+					const user = await User.findById(userId)
+
 					const newChatRoom = new ChatModel({
 						id: chat_id,
-						members: [userId],
+						members: [user],
 						messages: [],
 					})
 					await newChatRoom.save()
 					io.emit("get-chatRoom", newChatRoom)
 				} else {
-					io.emit(
-						"get-chatRoom",
-						await chatRoom.populate({
-							path: "messages",
-							populate: {
-								path: "user",
-								model: "users",
-							},
-						})
-					)
+					const populatedChatRoom = await chatRoom.populate({
+						path: "messages",
+						populate: {
+							path: "user",
+						},
+					})
+					console.log("populatedChatRoom", populatedChatRoom)
+
+					io.emit("get-chatRoom", populatedChatRoom)
 				}
 			} catch (error) {
 				console.error("Error while processing 'get-curent-chatRoom':", error)
