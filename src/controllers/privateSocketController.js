@@ -8,7 +8,6 @@ const ObjectId = Types.ObjectId;
 
 const connection = async (socket) => {
   const { user_id, chat_id = ObjectId().toString(), chat_title = '' } = socket.handshake?.query;
-  console.log(chat_id, user_id, chat_title);
 
    const user = await User.findById(user_id);
 
