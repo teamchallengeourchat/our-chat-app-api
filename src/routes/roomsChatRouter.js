@@ -54,8 +54,11 @@ export default async function (io) {
 				const newMessage = new Message({ text, user, chatId })
 				await newMessage.save()
 
-				if (chatRoom) {
+				if (chatRoom.messages) {
 					chatRoom.messages.push(newMessage)
+					await chatRoom.save()
+				} else {
+					chatRoom.messages = [newMessage]
 					await chatRoom.save()
 				}
 
