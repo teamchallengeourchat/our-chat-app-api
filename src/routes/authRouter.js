@@ -6,4 +6,4 @@ export const authRouter = express.Router();
 
 authRouter.post("/signup", ctrlWrapper(authController.signup));
 authRouter.post("/login", ctrlWrapper(authController.signin));
-authRouter.post("/logout", ctrlWrapper(authController.signout));
+authRouter.get("/logout/:userId", ctrlWrapper(authController.signout));

@@ -1,5 +1,10 @@
+import { Types } from 'mongoose';
 import { ApiError } from '../exceptions/ApiError.js';
 import { User } from '../models/user.js';
+import PrivatesList from '../models/userPrivate/privatesList.js';
+import privateServices from '../services/privateServices.js';
+
+const ObjectId = Types.ObjectId;
 
 async function signup(req, res) {
   const { userName, userMood } = req.body;
@@ -25,6 +30,18 @@ async function signup(req, res) {
 
 async function signin(req, res) {}
 
-async function signout(req, res) {}
+async function signout(req, res) {
+  const { userId } = req.params;
+
+  const chatList = (await PrivatesList.find({ users: { $in: ObjectId(userId)}})).map(chat => chat._id.toString());
+  chatList.forEach((chatId) => { privateServices.leaveChat(chatId, userId) });
+
+  await User.findByIdAndDelete(userId);
+  
+  return res.status(200).json({
+    code: 200,
+    status: 'OK'
+  });
+}
 
 export const authController = { signup, signin, signout };

@@ -23,8 +23,9 @@ const connection = async (socket) => {
   await socket.join(chat_id);
 
   socket.emit("history", {
-    message: await privateServices.getChatHistory(chat_id),
-    chats: await privateServices.getChats(user_id)
+    chat_id,
+    message: privateServices.getChatHistory(chat_id),
+    chats: privateServices.getChats(user_id)
   });
   socket.to(chat_id).emit("user-connected", { title: user.userName });
 }
@@ -41,11 +42,9 @@ const leaveChat = async (socket, { chat_id, user_id }) => {
 
   if (!user) ApiError.Unauthorized();
 
-  const chatRoom = await PrivatesList.findById(chat_id);
-  chatRoom.users.filter(id => id.toString() !== user_id);
-  
-  if (chatRoom.users.length > 0) await chatRoom.save();
-  else await PrivatesList.findByIdAndDelete(chat_id);
+  const result = privateServices.leaveChat(chat_id, user_id);
+
+  if (!result) throw new ApiError.BadRequest('Can`t leave chat');
 
   socket.emit("leave-chat", { status: 'OK' });
   socket.to(room).emit("leave-chat", { title: user.userName });
