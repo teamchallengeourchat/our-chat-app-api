@@ -23,7 +23,6 @@ const app = express();
 
 // Load environment variables
 const PORT = process.env.SERVER_PORT || 8080;
-const startupDevMode = app.get('env') === 'development';
 
 dbConnect();
 
