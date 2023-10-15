@@ -11,9 +11,10 @@ import { dbConnect } from './services/dbConnect.js';
 import {
   globalRouter,
   authRouter,
+  privatesRouter,
   roomsRouter,
   userRouter,
-  privateChatsRouter,
+  privatesSocketRouter,
   roomsChatRouter,
 } from './routes/index.js';
 
@@ -43,6 +44,7 @@ app.use('/images', express.static('images'));
 // routes
 app.use('/', globalRouter);
 app.use('/auth', authRouter);
+app.use('/privates', privatesRouter);
 app.use('/rooms', roomsRouter);
 app.use('/user', userRouter);
 
@@ -57,7 +59,7 @@ const io = new Server(httpServer, {
   },
 });
 
-privateChatsRouter(io);
+privatesSocketRouter(io);
 roomsChatRouter(io);
 
 
