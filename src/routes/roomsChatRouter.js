@@ -71,6 +71,7 @@ export default async function (io) {
 				})
 				console.log("upDatedChat", upDatedChat)
 
+				socket.emit("receive-message", upDatedChat.messages.at(-1));
 				activeUsers.forEach(element => {
 					io.to(element.socketId).emit("receive-message", upDatedChat.messages.at(-1))
 				})

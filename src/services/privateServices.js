@@ -6,11 +6,12 @@ import { PrivatesList, PrivateMessages } from "../models/userPrivate/index.js"
  * @returns {[{ id: String, title: String }]} Prepared list of private messages
  */
 async function getChats(userId) {
-	let List = await PrivatesList.find({ users: { $in: userId } }).populate("users")
-
-	List = List.map(({ _id, users }) => ({ id: _id.toString(), title: users.map(user => user.userName).join(", ") }))
-
-	return List
+  
+	let List = await PrivatesList.find({users: { $in: userId}}).populate('users').sort({ createdAt: -1 });
+	
+	List = List.map(({ _id, users }) => ({ id: _id.toString(), title: users.map(user => user.userName).join(", ") }));
+  
+  return List || [];
 }
 
 /**
