@@ -11,7 +11,7 @@ async function getChats(userId) {
 	
 	List = List.map(({ _id, users }) => ({ id: _id.toString(), title: users.map(user => user.userName).join(", ") }));
   
-  return List;
+  return List || [];
 }
 
 /**
