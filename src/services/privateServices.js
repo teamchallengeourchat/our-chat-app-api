@@ -8,7 +8,10 @@ import { PrivatesList, PrivateMessages } from "../models/userPrivate/index.js"
 async function getChats(userId) {
 	let List = await PrivatesList.find({ users: { $in: userId } }).populate("users")
 
-	List = List.map(({ _id, users }) => ({ id: _id.toString(), title: users.map(user => user.userName).join(", ") }))
+	List = List.sort((a, b) => b.createdAt - a.createdAt).map(({ _id, users }) => ({
+		id: _id.toString(),
+		title: users.map(user => user.userName).join(", "),
+	}))
 
 	return List
 }
