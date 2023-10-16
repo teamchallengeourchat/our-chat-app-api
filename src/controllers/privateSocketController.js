@@ -15,13 +15,11 @@ const connection = async socket => {
 
 	let chatRoom = await PrivatesList.findById(chat_id)
 
-	if (!chatRoom) {
-		chatRoom = await new PrivatesList({ _id: ObjectId(chat_id), users: user_id, title: chat_title }).save()
-	}
+	if (!chatRoom) ApiError.BadRequest('Chat not found');
 
-	if (!chatRoom?.users?.includes(user_id)) {
-		chatRoom?.users?.push(user_id)
-		await chatRoom?.save()
+	if (!chatRoom.users.includes(user_id)) {
+		chatRoom.users.push(user_id)
+		await chatRoom.save()
 	}
 
 	await socket.join(chat_id)
@@ -42,21 +40,7 @@ const sendMessage = async (socket, { message, room, userId }) => {
 	socket.to(room).emit("message", populatedMessage)
 }
 
-const leaveChat = async (socket, { chat_id, user_id }) => {
-	const user = await User.findById(user_id)
-
-	if (!user) ApiError.Unauthorized()
-
-	const result = privateServices.leaveChat(chat_id, user_id)
-
-	if (!result) throw new ApiError.BadRequest("Can`t leave chat")
-
-	socket.emit("leave-chat", { status: "OK" })
-	socket.to(room).emit("leave-chat", { title: user.userName })
-}
-
 export default {
 	connection,
 	sendMessage,
-	leaveChat,
 }

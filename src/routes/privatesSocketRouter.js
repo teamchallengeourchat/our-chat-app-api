@@ -6,9 +6,6 @@ export default function (io) {
 		privatesSocketController.connection(socket)
 
 		//
-		socket.on("leave-chat", data => privatesSocketController.leaveChat(socket, data))
-
-		//
 		socket.on("message", data => privatesSocketController.sendMessage(socket, data))
 
 		//

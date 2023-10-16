@@ -53,7 +53,7 @@ app.use("/user", userRouter)
 app.use(errorsMidleware)
 
 const httpServer = http.createServer(app)
-const io = new Server(httpServer, {
+export const io = new Server(httpServer, {
 	cors: {
 		origin: corsOrigin,
 		optionsSuccessStatus: 200,
