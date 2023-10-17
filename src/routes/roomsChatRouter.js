@@ -38,7 +38,6 @@ export default async function (io) {
 							path: 'user',
 						},
 					})
-					console.log('populatedChatRoom', populatedChatRoom)
 
 					io.emit('get-chatRoom', populatedChatRoom)
 				}
