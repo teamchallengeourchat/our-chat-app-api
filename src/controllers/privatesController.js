@@ -1,8 +1,7 @@
-import { ApiError } from '../exceptions/ApiError.js'
-import { User } from '../models/user.js'
-import privateServices from '../services/privateServices.js'
-import { io } from '../server.js'
-import { Types } from 'mongoose'
+import { ApiError } from "../exceptions/ApiError.js"
+import { User } from "../models/user.js"
+import privateServices from "../services/privateServices.js"
+import { Types } from "mongoose"
 
 const ObjectId = Types.ObjectId
 
@@ -48,15 +47,9 @@ const leaveChat = async () => {
 
 	if (!user) ApiError.Unauthorized()
 
-	const result = privateServices.leaveChat(chat_id, user_id)
+	const result = await privateServices.leaveChat(chat_id, user_id)
 
 	if (!result) throw new ApiError.BadRequest('Can`t leave chat')
-
-	io.of('/private-chat').join(chat_id)
-
-	io.of('/private-chat').to(chat_id).emit('leave-chat', { title: user.userName })
-
-	io.of('/private-chat').leave(chat_id)
 
 	try {
 		res.status(200).json({ status: 200, text: 'OK' })

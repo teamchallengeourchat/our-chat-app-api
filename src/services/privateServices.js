@@ -1,4 +1,6 @@
-import { PrivatesList, PrivateMessages } from '../models/userPrivate/index.js'
+import { PrivatesList, PrivateMessages } from "../models/userPrivate/index.js"
+import { ChatModel } from "../models/ChatModel.js"
+import { Message } from "../models/Message.js"
 
 /**
  *
@@ -16,6 +18,27 @@ async function getChats(userId) {
 	}))
 
 	return List || []
+}
+
+
+/**
+ *
+ * @param {String} chatId
+ * @returns {[{ id: String, author: { id: String, name: String }, message: String, createdAt: Date }]} Prepared list of messages;
+ */
+async function getRooms(chatId) {
+	let List = await ChatModel.find({ id: chatId }).sort({ createdAt: 1 });
+  
+  return List || [];
+}
+
+/**
+ *
+ * @param {String} chatId
+ * @returns  Prepared list of messages;
+ */
+async function getRoomHistory(roomId) {
+	const messages = await Message.find({ chatId: roomId }).populate("user").sort({ createdAt: 1 })
 }
 
 /**
@@ -57,6 +80,8 @@ async function leaveChat(chat_id, user_id) {
 }
 
 export default {
+	getRooms,
+	getRoomHistory,
 	getChats,
 	getChatHistory,
 	leaveChat,
