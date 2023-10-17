@@ -17,6 +17,6 @@ const messageSchema = new Schema(
 		},
 	},
 	{ timestamps: true }
-)
+).index({ createdAt: 1 }, { expireAfterSeconds: 2 * 24 * 60 * 60 })
 
 export const Message = model("Message", messageSchema)
