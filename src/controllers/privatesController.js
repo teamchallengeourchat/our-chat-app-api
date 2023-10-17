@@ -3,6 +3,7 @@ import { User } from '../models/user.js'
 import privateServices from '../services/privateServices.js'
 import { io } from '../server.js'
 import { Types } from 'mongoose'
+import { PrivatesList } from '../models/userPrivate/index.js'
 
 const ObjectId = Types.ObjectId
 
