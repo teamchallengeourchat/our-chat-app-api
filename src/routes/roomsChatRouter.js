@@ -1,23 +1,23 @@
 // import { Rooms } from '../models/rooms.js'
-import { ChatModel } from "../models/ChatModel.js"
-import { Message } from "../models/Message.js"
-import { User } from "../models/user.js"
+import { ChatModel } from '../models/ChatModel.js'
+import { Message } from '../models/Message.js'
+import { User } from '../models/user.js'
 
 export default async function (io) {
 	let activeUsers = []
 
-	io.on("connection", socket => {
-		socket.on("new-user-add", async user_id => {
+	io.on('connection', socket => {
+		socket.on('new-user-add', async user_id => {
 			if (!activeUsers.some(user => user.userId === user_id)) {
 				activeUsers.push({ userId: user_id, socketId: socket.id })
 			}
 
-			io.emit("get-users", activeUsers)
+			io.emit('get-users', activeUsers)
 		})
-		socket.on("add-user-in-curent-chatRoom", ({ userName }) => {
-			io.emit("user-added-in-chatRoom", userName)
+		socket.on('add-user-in-curent-chatRoom', ({ userName }) => {
+			io.emit('user-added-in-chatRoom', userName)
 		})
-		socket.on("get-curent-chatRoom", async (chat_id, userId) => {
+		socket.on('get-curent-chatRoom', async (chat_id, userId) => {
 			try {
 				const chatRoom = await ChatModel.findOne({ id: chat_id })
 
@@ -30,23 +30,23 @@ export default async function (io) {
 						messages: [],
 					})
 					await newChatRoom.save()
-					io.emit("get-chatRoom", newChatRoom)
+					io.emit('get-chatRoom', newChatRoom)
 				} else {
 					const populatedChatRoom = await chatRoom.populate({
-						path: "messages",
+						path: 'messages',
 						populate: {
-							path: "user",
+							path: 'user',
 						},
 					})
-					console.log("populatedChatRoom", populatedChatRoom)
+					console.log('populatedChatRoom', populatedChatRoom)
 
-					io.emit("get-chatRoom", populatedChatRoom)
+					io.emit('get-chatRoom', populatedChatRoom)
 				}
 			} catch (error) {
 				console.error("Error while processing 'get-curent-chatRoom':", error)
 			}
 		})
-		socket.on("send-message", async ({ text, senderId, chatId }) => {
+		socket.on('send-message', async ({ text, senderId, chatId }) => {
 			try {
 				const chatRoom = await ChatModel.findOne({ id: chatId })
 
@@ -63,26 +63,26 @@ export default async function (io) {
 				}
 
 				const upDatedChat = await chatRoom.populate({
-					path: "messages",
+					path: 'messages',
 					populate: {
-						path: "user",
-						model: "users",
+						path: 'user',
+						model: 'users',
 					},
 				})
-				console.log("upDatedChat", upDatedChat)
+				console.log('upDatedChat', upDatedChat)
 
-				socket.emit("receive-message", upDatedChat.messages.at(-1));
+				socket.emit('receive-message', upDatedChat.messages.at(-1))
 				activeUsers.forEach(element => {
-					io.to(element.socketId).emit("receive-message", upDatedChat.messages.at(-1))
+					io.to(element.socketId).emit('receive-message', upDatedChat.messages.at(-1))
 				})
 			} catch (error) {
 				console.error("Error while processing 'get-curent-chatRoom':", error)
 			}
 		})
-		socket.on("disconnect", () => {
+		socket.on('disconnect', () => {
 			activeUsers = activeUsers.filter(user => user.socketId !== socket.id)
-			console.log("User Disconnected", activeUsers)
-			io.emit("get-users", activeUsers)
+			console.log('User Disconnected', activeUsers)
+			io.emit('get-users', activeUsers)
 		})
 	})
 }

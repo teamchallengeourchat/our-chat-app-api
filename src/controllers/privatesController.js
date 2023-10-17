@@ -1,10 +1,10 @@
-import { ApiError } from "../exceptions/ApiError.js"
-import { User } from "../models/user.js"
-import privateServices from "../services/privateServices.js"
-import { io } from "../server.js"
-import { Types } from "mongoose"
+import { ApiError } from '../exceptions/ApiError.js'
+import { User } from '../models/user.js'
+import privateServices from '../services/privateServices.js'
+import { io } from '../server.js'
+import { Types } from 'mongoose'
 
-const ObjectId = Types.ObjectId;
+const ObjectId = Types.ObjectId
 
 const getChats = async (req, res) => {
 	const { userId } = req.params
@@ -27,7 +27,11 @@ const createChat = async (req, res) => {
 
 	if (!user) ApiError.Unauthorized()
 
-	const chatRoom = await new PrivatesList({ _id: ObjectId(chat_id), users: [ObjectId(user_id)], title: chat_title }).save()
+	const chatRoom = await new PrivatesList({
+		_id: ObjectId(chat_id),
+		users: [ObjectId(user_id)],
+		title: chat_title,
+	}).save()
 
 	try {
 		res.status(200).json({ chat_id: chatRoom._id.toString() })
@@ -39,20 +43,20 @@ const createChat = async (req, res) => {
 const leaveChat = async () => {
 	const { user_id } = req.params
 	const { chat_id } = req.body
-	
+
 	const user = await User.findById(user_id)
 
 	if (!user) ApiError.Unauthorized()
 
 	const result = privateServices.leaveChat(chat_id, user_id)
 
-	if (!result) throw new ApiError.BadRequest("Can`t leave chat")
+	if (!result) throw new ApiError.BadRequest('Can`t leave chat')
 
-	io.of("/private-chat").join(chat_id)
+	io.of('/private-chat').join(chat_id)
 
-	io.of("/private-chat").to(chat_id).emit("leave-chat", { title: user.userName });
+	io.of('/private-chat').to(chat_id).emit('leave-chat', { title: user.userName })
 
-	io.of("/private-chat").leave(chat_id)
+	io.of('/private-chat').leave(chat_id)
 
 	try {
 		res.status(200).json({ status: 200, text: 'OK' })

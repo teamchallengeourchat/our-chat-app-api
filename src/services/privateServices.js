@@ -1,4 +1,4 @@
-import { PrivatesList, PrivateMessages } from "../models/userPrivate/index.js"
+import { PrivatesList, PrivateMessages } from '../models/userPrivate/index.js'
 
 /**
  *
@@ -6,12 +6,16 @@ import { PrivatesList, PrivateMessages } from "../models/userPrivate/index.js"
  * @returns {[{ id: String, title: String }]} Prepared list of private messages
  */
 async function getChats(userId) {
-  
-	let List = await PrivatesList.find({users: { $in: userId}}).populate('users').sort({ createdAt: -1 });
-	
-	List = List.map(({ _id, users }) => ({ id: _id.toString(), title: users.map(user => user.userName).join(", ") }));
-  
-  return List || [];
+	let List = await PrivatesList.find({ users: { $in: userId } })
+		.populate('users')
+		.sort({ createdAt: -1 })
+
+	List = List.map(({ _id, users }) => ({
+		id: _id.toString(),
+		title: users.map(user => user.userName).join(', '),
+	}))
+
+	return List || []
 }
 
 /**
@@ -20,7 +24,7 @@ async function getChats(userId) {
  * @returns {[{ id: String, author: { id: String, name: String }, message: String, createdAt: Date }]} Prepared list of messages;
  */
 async function getChatHistory(chatId) {
-	const messages = await PrivateMessages.find({ chatId }).populate("author")
+	const messages = await PrivateMessages.find({ chatId }).populate('author')
 
 	// const preparedMessages = messages.map(({ _id, author, message, createdAt }) => ({
 	// 	id: _id.toString(),

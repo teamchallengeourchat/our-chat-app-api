@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose"
+import { Schema, model } from 'mongoose'
 
 const messageSchema = new Schema(
 	{
@@ -8,7 +8,7 @@ const messageSchema = new Schema(
 		},
 		user: {
 			type: Schema.Types.ObjectId,
-			ref: "users",
+			ref: 'users',
 			required: true,
 		},
 		chatId: {
@@ -16,7 +16,7 @@ const messageSchema = new Schema(
 			required: true,
 		},
 	},
-	{ timestamps: true }
+	{ timestamps: true },
 )
 
-export const Message = model("Message", messageSchema)
+export const Message = model('Message', messageSchema)

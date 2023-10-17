@@ -1,5 +1,5 @@
-import { ChatModel } from "../models/ChatModel.js"
-import { Rooms } from "../models/rooms.js"
+import { ChatModel } from '../models/ChatModel.js'
+import { Rooms } from '../models/rooms.js'
 
 const GetRooms = async (req, res) => {
 	let rooms = await Rooms.find().exec()
@@ -15,8 +15,8 @@ const GetRooms = async (req, res) => {
 const GetRoomById = async (req, res) => {
 	const { id } = req.params
 
-	if (id === "undefined" && id === "null") {
-		console.error("chat_id is not defined")
+	if (id === 'undefined' && id === 'null') {
+		console.error('chat_id is not defined')
 		return
 	}
 
