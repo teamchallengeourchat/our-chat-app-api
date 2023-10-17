@@ -19,6 +19,6 @@ const ChatSchema = new Schema({
 			ref: 'users',
 		},
 	],
-})
+}).index({ createdAt: -1 })
 
 export const ChatModel = model('Chat', ChatSchema)

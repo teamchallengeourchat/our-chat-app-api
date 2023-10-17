@@ -50,14 +50,6 @@ const leaveChat = async (req, res) => {
 
 	if (!result) throw new ApiError.BadRequest('Can`t leave chat')
 
-	// io.of('/private-chat').join(chatId)
-
-	// io.of('/private-chat').to(chatId).emit('leave-chat', { title: user.userName })
-
-	// io.of('/private-chat').leave(chatId)
-
-	const chats = await privateServices.getChats(userId)
-
 	try {
 		if (result) res.status(200).json({ status: 200, chats })
 	} catch (error) {
