@@ -1,13 +1,13 @@
-import { ApiError } from "../exceptions/ApiError.js";
+import { ApiError } from '../exceptions/ApiError.js'
 
 export function errorsMidleware(error, req, res, next) {
-  if (error instanceof ApiError) {
-    const { status, message, errors } = error;
+	if (error instanceof ApiError) {
+		const { status, message, errors } = error
 
-    res.status(status).send({ message, errors });
+		res.status(status).send({ message, errors })
 
-    return;
-  }
+		return
+	}
 
-  res.status(500).send({ message: 'Unexpected error' });
-};
+	res.status(500).send({ message: 'Unexpected error' })
+}
