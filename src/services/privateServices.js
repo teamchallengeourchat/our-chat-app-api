@@ -1,6 +1,6 @@
-import { PrivatesList, PrivateMessages } from "../models/userPrivate/index.js"
-import { ChatModel } from "../models/ChatModel.js"
-import { Message } from "../models/Message.js"
+import { PrivatesList, PrivateMessages } from '../models/userPrivate/index.js'
+import { ChatModel } from '../models/ChatModel.js'
+import { Message } from '../models/Message.js'
 
 /**
  *
@@ -20,16 +20,15 @@ async function getChats(userId) {
 	return preparedChatList ?? []
 }
 
-
 /**
  *
  * @param {String} chatId
  * @returns {[{ id: String, author: { id: String, name: String }, message: String, createdAt: Date }]} Prepared list of messages;
  */
 async function getRooms(chatId) {
-	let List = await ChatModel.find({ id: chatId }).sort({ createdAt: 1 });
-  
-  return List || [];
+	let List = await ChatModel.find({ id: chatId }).sort({ createdAt: 1 })
+
+	return List || []
 }
 
 /**
@@ -38,7 +37,7 @@ async function getRooms(chatId) {
  * @returns  Prepared list of messages;
  */
 async function getRoomHistory(roomId) {
-	const messages = await Message.find({ chatId: roomId }).populate("user").sort({ createdAt: 1 })
+	const messages = await Message.find({ chatId: roomId }).populate('user').sort({ createdAt: 1 })
 }
 
 /**
@@ -69,7 +68,6 @@ async function leaveChat(chatId, userId) {
 	try {
 		const chatRoom = await PrivatesList.findById(chatId)
 		chatRoom.users = chatRoom.users.filter(id => id.toString() !== userId)
-
 		if (chatRoom.users.length > 0) {
 			await chatRoom.save()
 		} else {
