@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose"
+import { Schema, model } from 'mongoose'
 
 const ChatSchema = new Schema({
 	id: {
@@ -9,16 +9,16 @@ const ChatSchema = new Schema({
 	messages: [
 		{
 			type: Schema.Types.ObjectId,
-			ref: "Message",
+			ref: 'Message',
 			default: [],
 		},
 	],
 	members: [
 		{
 			type: Schema.Types.ObjectId,
-			ref: "users",
+			ref: 'users',
 		},
 	],
 }).index({ createdAt: -1 })
 
-export const ChatModel = model("Chat", ChatSchema)
+export const ChatModel = model('Chat', ChatSchema)
