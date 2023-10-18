@@ -8,10 +8,6 @@ import privateServices from '../services/privateServices.js'
 const connection = async socket => {
 	const { userId, roomId } = socket.handshake?.query
 
-	const user = await User.findById(userId)
-
-	if (!user) ApiError.Unauthorized()
-
 	if (
 		roomId !== 'news' &&
 		roomId !== 'general' &&
@@ -21,11 +17,16 @@ const connection = async socket => {
 	) {
 		socket.emit('error', 'Invalid room ID')
 	}
-	if (!user) return
 
-	const chatRoom = await ChatModel.findOne({ id: roomId })
+	const [chatRoom, user] = await Promise.all([
+		ChatModel.findOne({ id: roomId }),
+		User.findById(userId),
+	])
 
-	if (!chatRoom) ApiError.BadRequest('Chat not found')
+	if (!chatRoom || !user) {
+		socket.emit('error')
+		return
+	}
 
 	await socket.join(roomId)
 

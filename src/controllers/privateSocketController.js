@@ -13,7 +13,6 @@ const connection = async socket => {
 		const hex = /^(?:[0-9A-Fa-f]{24}|[0-9]{1,19}|[A-Fa-f0-9]{24})$/
 		if (!hex.test(chatId)) {
 			socket.emit('error', 'Invalid chatId')
-			// ApiError.Unauthorized()
 			return
 		}
 
@@ -25,34 +24,33 @@ const connection = async socket => {
 		if (!user) {
 			ApiError.Unauthorized()
 			return
-		}
-
-		if (chatRoom) {
-			if (!chatRoom.users.includes(userId)) {
-				chatRoom.users.push(userId)
-				await chatRoom.save()
-			}
-
-			await socket.join(chatId)
-
-			const chatList = await chatRoom.populate('users')
-			chatRoom.title =
-				chatRoom.users.length === 1
-					? 'Новий чат (зараз тут тільки ти)'
-					: chatList.users
-							.filter(({ _id }) => _id.toString() !== userId)
-							.map(({ userName }) => userName)
-							.join(', ')
-			await chatRoom.save()
-
-			socket.emit('history', {
-				chat: chatRoom,
-				messages: await privateServices.getChatHistory(chatId),
-			})
-			socket.to(chatId).emit('user-connected', { title: user.userName })
-		} else {
+		} else if (!chatRoom) {
 			socket.emit('deleted-chat')
+			return
 		}
+
+		if (!chatRoom.users.includes(userId)) {
+			chatRoom.users.push(userId)
+			await chatRoom.save()
+		}
+
+		await socket.join(chatId)
+
+		const chatList = await chatRoom.populate('users')
+		chatRoom.title =
+			chatRoom.users.length === 1
+				? 'Новий чат (зараз тут тільки ти)'
+				: chatList.users
+						.filter(({ _id }) => _id.toString() !== userId)
+						.map(({ userName }) => userName)
+						.join(', ')
+		await chatRoom.save()
+
+		socket.emit('history', {
+			chat: chatRoom,
+			messages: await privateServices.getChatHistory(chatId),
+		})
+		socket.to(chatId).emit('user-connected', { title: user.userName })
 	} catch (err) {
 		console.log(err)
 	}
