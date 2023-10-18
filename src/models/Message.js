@@ -1,7 +1,6 @@
 import { Schema, model } from 'mongoose'
 
-export default {
-	Message: model(
+export const Message = model(
 		'Message',
 		new Schema(
 			{
@@ -26,4 +25,3 @@ export default {
 			{ timestamps: true }
 		).index({ createdAt: 1 }, { expireAfterSeconds: 2 * 24 * 60 * 60 })
 	)
-}
