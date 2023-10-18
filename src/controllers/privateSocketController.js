@@ -45,7 +45,7 @@ const connection = async socket => {
 
 	let populateTitle = chatRoom.users.length === 1
 		? 'Новий чат (зараз тут тільки ти)'
-		: chatList.users
+		: chatRoom.users
 				.filter(({ _id }) => _id.toString() !== userId)
 				.map(({ userName }) => userName)
 				.join(', ');
