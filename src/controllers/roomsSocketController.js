@@ -1,41 +1,46 @@
-import { Types } from "mongoose";
-import { ApiError } from "../exceptions/ApiError.js"
-import { ChatModel } from "../models/ChatModel.js"
-import { Message } from "../models/Message.js"
-import { User } from "../models/user.js"
-
-const { ObjectId } = Types;
+import { Types } from 'mongoose'
+import { ApiError } from '../exceptions/ApiError.js'
+import { ChatModel } from '../models/ChatModel.js'
+import { Message } from '../models/Message.js'
+import { User } from '../models/user.js'
+import privateServices from '../services/privateServices.js'
 
 const connection = async socket => {
-	const { user_id, chat_id = ObjectId().toString() } = socket.handshake?.query
+	const { userId, roomId } = socket.handshake?.query
 
-	const user = await User.findById(user_id)
+	const user = await User.findById(userId)
 
 	if (!user) ApiError.Unauthorized()
 
-	let chatRoom = await ChatModel.findOne({ id: chat_id })
-
-	if (!chatRoom) ApiError.BadRequest('Chat not found');
-
-	if (!chatRoom.members.includes(user_id)) {
-		chatRoom.members.push(user_id)
-		await chatRoom.save()
+	if (
+		roomId !== 'news' &&
+		roomId !== 'general' &&
+		roomId !== 'dating' &&
+		roomId !== 'business' &&
+		roomId !== 'work'
+	) {
+		socket.emit('error', 'Invalid room ID')
 	}
+	if (!user) return
 
-	await socket.join(chat_id)
+	const chatRoom = await ChatModel.findOne({ id: roomId })
 
-	socket.emit("history", {
-		messages: await privateServices.getChatHistory(chat_id),
+	if (!chatRoom) ApiError.BadRequest('Chat not found')
+
+	await socket.join(roomId)
+
+	socket.emit('history', {
+		messages: await privateServices.getRoomHistory(roomId),
 	})
-	socket.to(chat_id).emit("user-connected", { title: user.userName })
+	socket.to(roomId).emit('user-connected', { title: user.userName })
 }
 
-const sendMessage = async (socket, { message, room }, userId) => {
-	const newMessage = await Message.create({ chatId: room, author: userId, message })
-	const populatedMessage = await newMessage.populate("author")
+const sendMessage = async (socket, { text, senderId, chatId }) => {
+	const newMessage = await Message.create({ chatId, user: senderId, text })
+	const populatedMessage = await newMessage.populate('user')
 
-	socket.emit("message", populatedMessage)
-	socket.to(room).emit("message", populatedMessage)
+	socket.emit('message', populatedMessage)
+	socket.to(chatId).emit('message', populatedMessage)
 }
 
 export default {

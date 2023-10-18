@@ -15,16 +15,14 @@ const GetRooms = async (req, res) => {
 const GetRoomById = async (req, res) => {
 	const { id } = req.params
 
-	if (id === 'undefined' && id === 'null') {
+	if (!id) {
 		console.error('chat_id is not defined')
 		return
 	}
 
 	try {
-		let newChatRoom = null
 		const chatRoom = await ChatModel.findOne({ id })
-		newChatRoom = chatRoom
-		res.status(200).json(newChatRoom)
+		res.status(200).json(chatRoom)
 	} catch (error) {
 		res.status(500).json(error)
 	}
