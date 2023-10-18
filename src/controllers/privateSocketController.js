@@ -7,29 +7,52 @@ import { PrivatesList, PrivateMessages } from '../models/userPrivate/index.js'
 const ObjectId = Types.ObjectId
 
 const connection = async socket => {
-	const { user_id, chat_id = ObjectId().toString(), chat_title = '' } = socket.handshake?.query
-
-	const user = await User.findById(user_id)
+	const { userId, chatId = ObjectId().toString(), chat_title = '' } = socket.handshake?.query
+	const user = await User.findById(userId)
 
 	if (!user) ApiError.Unauthorized()
 
-	let chatRoom = await PrivatesList.findById(chat_id)
+	try {
+		const hex = /^(?:[0-9A-Fa-f]{24}|[0-9]{1,19}|[A-Fa-f0-9]{24})$/
 
-	if (!chatRoom) ApiError.BadRequest('Chat not found')
+		if (!hex.test(chatId)) {
+			socket.emit('error', 'Invalid chatId')
+			// ApiError.Unauthorized()
+			return
+		}
 
-	if (!chatRoom.users.includes(user_id)) {
-		chatRoom.users.push(user_id)
-		await chatRoom.save()
+		const chatRoom = await PrivatesList.findById(chatId)
+
+		if (chatRoom) {
+			if (!chatRoom?.users?.includes(userId)) {
+				chatRoom?.users?.push(userId)
+				// chatRoom.title =
+				// 	chatRoom.users.length === 2 ? user.userName : chatRoom.title + user.userName
+				await chatRoom?.save()
+			}
+
+			await socket.join(chatId)
+
+			const chatList = await chatRoom.populate('users')
+			chatRoom.title =
+				chatRoom.users.length === 1
+					? 'Новий чат (зараз тут тільки ти)'
+					: chatList.users
+							.filter(({ _id }) => _id.toString() !== userId)
+							.map(({ userName }) => userName)
+							.join(', ')
+			await chatRoom.save()
+
+			socket.emit('history', {
+				chat: chatRoom,
+				messages: await privateServices.getChatHistory(chatId),
+				chats: await privateServices.getChats(userId),
+			})
+			socket.to(chatId).emit('user-connected', { title: user.userName })
+		}
+	} catch (err) {
+		console.log(err)
 	}
-
-	await socket.join(chat_id)
-
-	socket.emit('history', {
-		chat_id,
-		messages: await privateServices.getChatHistory(chat_id),
-		chats: await privateServices.getChats(user_id),
-	})
-	socket.to(chat_id).emit('user-connected', { title: user.userName })
 }
 
 const sendMessage = async (socket, { message, room, userId }) => {

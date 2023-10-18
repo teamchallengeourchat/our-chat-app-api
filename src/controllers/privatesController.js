@@ -1,12 +1,13 @@
-import { ApiError } from "../exceptions/ApiError.js"
-import { User } from "../models/user.js"
-import privateServices from "../services/privateServices.js"
-import { Types } from "mongoose"
+import { ApiError } from '../exceptions/ApiError.js'
+import { User } from '../models/user.js'
+import privateServices from '../services/privateServices.js'
+import { Types } from 'mongoose'
+import PrivatesList from '../models/userPrivate/privatesList.js'
 
 const ObjectId = Types.ObjectId
 
 const getChats = async (req, res) => {
-	const { userId } = req.params
+	const { user_id: userId } = req.params
 	const user = await User.findById(userId)
 
 	if (!user) ApiError.Unauthorized()
@@ -21,38 +22,38 @@ const getChats = async (req, res) => {
 }
 
 const createChat = async (req, res) => {
-	const { userId: user_id } = req.params
-	const user = await User.findById(user_id)
+	const { userId } = req.body
+	const user = await User.findById(userId)
 
 	if (!user) ApiError.Unauthorized()
 
 	const chatRoom = await new PrivatesList({
-		_id: ObjectId(chat_id),
-		users: [ObjectId(user_id)],
-		title: chat_title,
+		users: [user],
+		title: 'Новий чат (зараз тут тільки ти)',
 	}).save()
 
 	try {
-		res.status(200).json({ chat_id: chatRoom._id.toString() })
+		res.status(200).json({ id: chatRoom._id, title: chatRoom.title })
 	} catch (error) {
 		res.status(500).json(error)
 	}
 }
 
-const leaveChat = async () => {
-	const { user_id } = req.params
-	const { chat_id } = req.body
+const leaveChat = async (req, res) => {
+	const { userId, chatId } = req.body
 
-	const user = await User.findById(user_id)
+	const user = await User.findById(userId)
 
 	if (!user) ApiError.Unauthorized()
 
-	const result = await privateServices.leaveChat(chat_id, user_id)
+	const result = await privateServices.leaveChat(chatId, userId)
 
 	if (!result) throw new ApiError.BadRequest('Can`t leave chat')
 
+	const chats = await privateServices.getChats(userId)
+
 	try {
-		res.status(200).json({ status: 200, text: 'OK' })
+		if (result) res.status(200).json({ status: 200, chats })
 	} catch (error) {
 		res.status(500).json(error)
 	}
