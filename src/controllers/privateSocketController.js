@@ -74,7 +74,7 @@ const endWrite = async (socket, { room, userName }) => {
 	socket.to(room).emit('user-end-write', { userName })
 }
 
-export default {
+export {
 	connection,
 	sendMessage,
 	startWrite,

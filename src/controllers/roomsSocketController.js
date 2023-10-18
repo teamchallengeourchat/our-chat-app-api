@@ -52,7 +52,7 @@ const endWrite = async (socket, { chatId, userName }) => {
 	socket.to(chatId).emit('user-end-write', { userName })
 }
 
-export default {
+export {
 	connection,
 	sendMessage,
 	startWrite,
