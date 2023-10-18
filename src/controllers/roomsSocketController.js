@@ -14,7 +14,7 @@ const errorCodes = {
 const connection = async socket => {
 	const { userId, roomId } = socket.handshake?.query
 
-	if (['news', 'general', 'dating', 'business', 'work'].includes(roomId)) {
+	if (!['news', 'general', 'dating', 'business', 'work'].includes(roomId)) {
 		socket.emit('error', errorCodes.invalidRoomId)
 	}
 
