@@ -4,10 +4,6 @@ export default model(
 	'privates_lists',
 	new Schema(
 		{
-			title: {
-				type: String,
-				default: '',
-			},
 			users: {
 				type: [
 					{
@@ -19,9 +15,6 @@ export default model(
 				default: [],
 			},
 		},
-		{
-			versionKey: false,
-			timestamps: true,
-		},
+		{ versionKey: false, timestamps: true },
 	).index({ createdAt: -1 }),
 )
