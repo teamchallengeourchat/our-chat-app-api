@@ -13,7 +13,6 @@
 		"cross-env": "7.0.3",
 		"dotenv": "^16.0.3",
 		"eslint": "^8.51.0",
-		"eslint-plugin-prettier": "^5.0.1",
 		"express": "4.17.1",
 		"mongoose": "^6.9.2",
 		"morgan": "^1.10.0",
