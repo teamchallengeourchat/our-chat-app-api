@@ -12,9 +12,9 @@ async function getChats(userId) {
 		.populate('users')
 		.sort({ createdAt: -1 })
 
-	const preparedChatList = chatList.map(({ _id, title }) => ({
+	const preparedChatList = chatList.map(({ _id, users }) => ({
 		id: _id.toString(),
-		title,
+		title: users.filter(user => user._id.toString() !== userId).map(user => user.userName).join(', ') || 'Новий чат (зараз тут тільки ти)',
 	}))
 
 	return preparedChatList ?? []
@@ -37,8 +37,8 @@ async function getRooms(chatId) {
  * @returns  Prepared list of messages;
  */
 async function getRoomHistory(roomId) {
+	//TODO: Сделать подмена юзера на объект с именем юзера когда юзер разлогинился
 	const messages = await Message.find({ chatId: roomId }).populate('user').sort({ createdAt: 1 })
-	return messages || []
 }
 
 /**
@@ -66,18 +66,29 @@ async function getChatHistory(chatId) {
  * @returns {Boolean} if successful return true
  */
 async function leaveChat(chatId, userId) {
-	try {
-		const chatRoom = await PrivatesList.findById(chatId)
-		chatRoom.users = chatRoom.users.filter(id => id.toString() !== userId)
-		if (chatRoom.users.length > 0) {
-			await chatRoom.save()
-		} else {
-			await PrivatesList.findByIdAndDelete(chatId)
+	try { 
+		const chatRoom = await PrivatesList.findById(chatId).populate('author')
+
+		if (chatId) {
+			chatRoom.users = chatRoom.users.filter(id => id.toString() !== userId)
 		}
+
+		if (chatRoom.users.length === 0) {
+			await PrivatesList.findByIdAndDelete(chatId)
+			return true
+		}
+
+		await PrivateMessages.updateMany({
+			chatId: chatRoom._id,
+			 author: userId
+		}, {
+			authorName: user.userName
+		})
+
+		await chatRoom.save()
 		return true
 	} catch (error) {
 		return false
-		throw new Error(error)
 	}
 }
 

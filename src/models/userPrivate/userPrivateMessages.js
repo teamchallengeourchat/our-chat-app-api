@@ -19,6 +19,10 @@ export default model(
 				required: true,
 				default: '',
 			},
+			authorName: {
+				type: String,
+				default: ''
+			}
 		},
 		{
 			versionKey: false,

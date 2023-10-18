@@ -1,21 +1,21 @@
 import { Types } from 'mongoose'
-import { ApiError } from '../exceptions/ApiError.js'
+// import { ApiError } from '../exceptions/ApiError.js'
 import { ChatModel } from '../models/ChatModel.js'
 import { Message } from '../models/Message.js'
 import { User } from '../models/user.js'
 import privateServices from '../services/privateServices.js'
 
+const errorCodes = {
+	unauthorized: 0,
+	deletedRoom: 1,
+	invalidRoomId: 2
+}
+
 const connection = async socket => {
 	const { userId, roomId } = socket.handshake?.query
 
-	if (
-		roomId !== 'news' &&
-		roomId !== 'general' &&
-		roomId !== 'dating' &&
-		roomId !== 'business' &&
-		roomId !== 'work'
-	) {
-		socket.emit('error', 'Invalid room ID')
+	if (['news', 'general', 'dating', 'business', 'work'].include(roomId)) {
+		socket.emit('error', errorCodes.invalidRoomId)
 	}
 
 	const [chatRoom, user] = await Promise.all([
@@ -24,7 +24,7 @@ const connection = async socket => {
 	])
 
 	if (!chatRoom || !user) {
-		socket.emit('error')
+		socket.emit('error', errorCodes.unauthorized)
 		return
 	}
 
@@ -44,7 +44,17 @@ const sendMessage = async (socket, { text, senderId, chatId }) => {
 	socket.to(chatId).emit('message', populatedMessage)
 }
 
+const startWrite = async (socket, { chatId, userName }) => {
+	socket.to(chatId).emit('user-start-write', { userName })
+}
+
+const endWrite = async (socket, { chatId, userName }) => {
+	socket.to(chatId).emit('user-end-write', { userName })
+}
+
 export default {
 	connection,
 	sendMessage,
+	startWrite,
+	endWrite,
 }
