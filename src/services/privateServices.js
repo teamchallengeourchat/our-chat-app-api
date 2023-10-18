@@ -38,6 +38,7 @@ async function getRooms(chatId) {
  */
 async function getRoomHistory(roomId) {
 	const messages = await Message.find({ chatId: roomId }).populate('user').sort({ createdAt: 1 })
+	return messages || []
 }
 
 /**
