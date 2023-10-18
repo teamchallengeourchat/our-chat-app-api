@@ -1,7 +1,6 @@
 import { Schema, model, Types } from 'mongoose'
 
-export default {
-	Rooms: model('rooms', Schema(
+export const Rooms = model('rooms', Schema(
 		{
 			_id: {
 				type: Number,
@@ -33,5 +32,4 @@ export default {
 			},
 		},
 		{ versionKey: false, timestamps: false },
-	)),
-}
+	))

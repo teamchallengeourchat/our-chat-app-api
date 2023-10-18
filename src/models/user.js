@@ -1,7 +1,6 @@
 import { Schema, model } from 'mongoose'
 
-export default{
-	User: model(
+export const User = model(
 		'users',
 		new Schema(
 		{
@@ -16,4 +15,3 @@ export default{
 		},
 		{ versionKey: false, timestamps: true },
 	))
-}
