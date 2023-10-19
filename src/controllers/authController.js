@@ -35,26 +35,19 @@ async function signin(req, res) {}
 async function signout(req, res) {
 	const { userId } = req.params
 
-	console.log(userId);
-
 	const user = await User.findById(userId)
+	if (!user) return
 
 	const chatList = (await PrivatesList.find({ users: { $in: ObjectId(userId) } })).map(chat =>
 		chat._id.toString(),
 	)
-
-	// console.log(chatList);
 	chatList.forEach(chatId => {
 		privateServices.leaveChat(chatId, userId)
-	})	
-
-	await Message.updateMany({
-		user: ObjectId(userId),
-	}, {
-		userName: user.userName
 	})
 
-	await User.findByIdAndDelete(userId)
+	Message.updateMany({ user: ObjectId(userId) }, { userName: user.userName })
+
+	User.findByIdAndDelete(userId)
 
 	return res.status(200).json({
 		code: 200,
