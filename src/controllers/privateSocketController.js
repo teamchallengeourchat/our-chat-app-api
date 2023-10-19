@@ -67,12 +67,12 @@ const sendMessage = async (socket, { message, room, userId }) => {
 	socket.to(room).emit('message', populatedMessage)
 }
 
-const startWrite = async (socket, { room, userName }) => {
-	socket.to(room).emit('user-start-write', { userName })
+const startWrite = async (socket, { chatId, userName }) => {
+	socket.to(chatId).emit('user-start-write', { userName })
 }
 
-const endWrite = async (socket, { room, userName }) => {
-	socket.to(room).emit('user-end-write', { userName })
+const endWrite = async (socket, { chatId, userName }) => {
+	socket.to(chatId).emit('user-end-write', { userName })
 }
 
 export { connection, sendMessage, startWrite, endWrite }
