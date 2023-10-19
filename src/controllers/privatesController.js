@@ -24,13 +24,10 @@ const createChat = async (req, res) => {
 
 	if (!user) ApiError.Unauthorized()
 
-	const chatRoom = await new PrivatesList({
-		users: [user],
-		title: 'Новий чат (зараз тут тільки ти)',
-	}).save()
+	const chatRoom = await new PrivatesList({ users: [user] }).save()
 
 	try {
-		res.status(200).json({ id: chatRoom._id, title: chatRoom.title })
+		res.status(200).json({ id: chatRoom._id, title: 'Новий чат (зараз тут тільки ти)' })
 	} catch (error) {
 		res.status(500).json(error)
 	}
