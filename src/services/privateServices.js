@@ -1,6 +1,9 @@
 import { PrivatesList, PrivateMessages } from '../models/userPrivate/index.js'
 import { ChatModel } from '../models/ChatModel.js'
 import { Message } from '../models/Message.js'
+import { Types } from 'mongoose'
+
+const { ObjectId } = Types;
 
 /**
  *
@@ -38,7 +41,7 @@ async function getRooms(chatId) {
  */
 async function getRoomHistory(roomId) {
 	//TODO: Сделать подмена юзера на объект с именем юзера когда юзер разлогинился
-	const messages = await Message.find({ chatId: roomId }).populate('user').sort({ createdAt: 1 })
+	return await Message.find({ chatId: roomId }).populate('user').sort({ createdAt: 1 })
 }
 
 /**
@@ -80,7 +83,7 @@ async function leaveChat(chatId, userId) {
 
 		await PrivateMessages.updateMany({
 			chatId: chatRoom._id,
-			 author: userId
+			 author: ObjectId(userId)
 		}, {
 			authorName: user.userName
 		})

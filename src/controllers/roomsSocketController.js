@@ -17,6 +17,7 @@ const connection = async socket => {
 	if (!['news', 'general', 'dating', 'business', 'work'].includes(roomId)) {
 		socket.emit('error', errorCodes.invalidRoomId)
 	}
+	// console.log('connect', roomId, userId);
 
 	const [chatRoom, user] = await Promise.all([
 		ChatModel.findOne({ id: roomId }),
@@ -30,9 +31,23 @@ const connection = async socket => {
 
 	await socket.join(roomId)
 
-	socket.emit('history', {
-		messages: await privateServices.getRoomHistory(roomId),
+
+	let history = await privateServices.getRoomHistory(roomId) || []
+
+	console.log(history);
+
+	history = history.map(({ _id, text, user, chatId, createdAt, userName }) => {
+		const newUser = {
+			_id: user?._id,
+			userName:user?.userName || userName,
+			userMood: user?.userMood
+		};
+		return { _id, text, chatId, createdAt,	user: newUser }
 	})
+
+	// console.log(roomId, history, user.userName);
+
+	socket.emit('history', { messages: history })
 	socket.to(roomId).emit('user-connected', { title: user.userName })
 }
 

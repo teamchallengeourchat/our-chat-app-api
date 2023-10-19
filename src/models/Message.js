@@ -22,6 +22,6 @@ export const Message = model(
 					default: ''
 				}
 			},
-			{ timestamps: true }
+			{ versionKey: false, timestamps: true }
 		).index({ createdAt: 1 }, { expireAfterSeconds: 2 * 24 * 60 * 60 })
 	)
