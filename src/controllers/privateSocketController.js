@@ -9,7 +9,7 @@ const ObjectId = Types.ObjectId
 const errorCodes = {
 	unauthorized: 0,
 	deletedChat: 1,
-	invalidChatId: 2
+	invalidChatId: 2,
 }
 
 const connection = async socket => {
@@ -22,36 +22,37 @@ const connection = async socket => {
 	}
 
 	const [chatRoom, user] = await Promise.all([
-		PrivatesList.findById(chatId),
+		PrivatesList.findById(chatId).populate('users'),
 		User.findById(userId),
 	])
 
 	if (!user) {
 		socket.emit('error', errorCodes.unauthorized)
-		return;
-	};
+		return
+	}
 
 	if (!chatRoom) {
 		socket.emit('error', errorCodes.deletedChat)
-		return;
+		return
 	}
 
-	if (!chatRoom.users.includes(userId)) {
+	const isUserInRoom = chatRoom.users.some(user => user._id.equals(userId))
+	if (!isUserInRoom) {
 		chatRoom.users.push(userId)
-		await chatRoom.save()
 	}
 
 	await socket.join(chatId)
 
-	let populateTitle = chatRoom.users.length === 1
-		? 'Новий чат (зараз тут тільки ти)'
-		: chatRoom.users
-				.filter(({ _id }) => _id.toString() !== userId)
-				.map(({ userName }) => userName)
-				.join(', ');
+	const populateTitle =
+		chatRoom.users.length === 1
+			? 'Новий чат (зараз тут тільки ти)'
+			: chatRoom.users
+					.filter(({ _id }) => _id.toString() !== userId)
+					.map(({ userName }) => userName)
+					.join(', ')
 
 	socket.emit('history', {
-		chat: { ...chatRoom, title: populateTitle },
+		chat: { id: chatRoom._id, title: populateTitle },
 		messages: await privateServices.getChatHistory(chatId),
 	})
 
@@ -66,17 +67,12 @@ const sendMessage = async (socket, { message, room, userId }) => {
 	socket.to(room).emit('message', populatedMessage)
 }
 
-const startWrite = async (socket, { room, userName }) => {
-	socket.to(room).emit('user-start-write', { userName })
+const startWrite = async (socket, { chatId, userName }) => {
+	socket.to(chatId).emit('user-start-write', { userName })
 }
 
-const endWrite = async (socket, { room, userName }) => {
-	socket.to(room).emit('user-end-write', { userName })
+const endWrite = async (socket, { chatId, userName }) => {
+	socket.to(chatId).emit('user-end-write', { userName })
 }
 
-export {
-	connection,
-	sendMessage,
-	startWrite,
-	endWrite,
-}
+export { connection, sendMessage, startWrite, endWrite }

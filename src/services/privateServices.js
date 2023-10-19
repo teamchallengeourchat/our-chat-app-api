@@ -2,8 +2,9 @@ import { PrivatesList, PrivateMessages } from '../models/userPrivate/index.js'
 import { ChatModel } from '../models/ChatModel.js'
 import { Message } from '../models/Message.js'
 import { Types } from 'mongoose'
+import { User } from '../models/user.js'
 
-const { ObjectId } = Types;
+const { ObjectId } = Types
 
 /**
  *
@@ -17,7 +18,11 @@ async function getChats(userId) {
 
 	const preparedChatList = chatList.map(({ _id, users }) => ({
 		id: _id.toString(),
-		title: users.filter(user => user._id.toString() !== userId).map(user => user.userName).join(', ') || 'Новий чат (зараз тут тільки ти)',
+		title:
+			users
+				.filter(user => user._id.toString() !== userId)
+				.map(user => user.userName)
+				.join(', ') || 'Новий чат (зараз тут тільки ти)',
 	}))
 
 	return preparedChatList ?? []
@@ -69,26 +74,23 @@ async function getChatHistory(chatId) {
  * @returns {Boolean} if successful return true
  */
 async function leaveChat(chatId, userId) {
-	try { 
-		const chatRoom = await PrivatesList.findById(chatId).populate('author')
-
-		if (chatId) {
-			chatRoom.users = chatRoom.users.filter(id => id.toString() !== userId)
-		}
+	try {
+		const chatRoom = await PrivatesList.findById(chatId).populate('users')
+		chatRoom.users = chatRoom.users.filter(({ _id }) => _id.toString() !== userId)
 
 		if (chatRoom.users.length === 0) {
 			await PrivatesList.findByIdAndDelete(chatId)
 			return true
 		}
 
-		await PrivateMessages.updateMany({
-			chatId: chatRoom._id,
-			 author: ObjectId(userId)
-		}, {
-			authorName: user.userName
-		})
+		const user = await User.findById(userId)
+		PrivateMessages.updateMany(
+			{ chatId: chatRoom._id, author: ObjectId(userId) },
+			{ authorName: user.userName },
+		)
 
-		await chatRoom.save()
+		chatRoom.save()
+
 		return true
 	} catch (error) {
 		return false

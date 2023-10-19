@@ -3,22 +3,7 @@
 		"ecmaVersion": "latest",
 		"sourceType": "module"
 	},
-	"plugins": ["prettier"],
 	"rules": {
-		// "prettier/prettier": [
-		// 	"error",
-		// 	{
-		// 		"printWidth": 100,
-		// 		"arrowParens": "avoid",
-		// 		"semi": false,
-		// 		"singleQuote": true,
-		// 		"jsxSingleQuote": true,
-		// 		"useTabs": true,
-		// 		"bracketSameLine": false,
-		// 		"trailingComma": "all",
-		// 		"endOfLine": "auto"
-		// 	}
-		// ],
 		"eol-last": "warn",
 		"no-duplicate-imports": "warn",
 		"object-curly-spacing": ["error", "always"],
