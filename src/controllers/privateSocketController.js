@@ -13,7 +13,7 @@ const errorCodes = {
 }
 
 const connection = async socket => {
-	const { userId, chatId = ObjectId().toString(), chat_title = '' } = socket.handshake?.query
+	const { userId, chatId } = socket.handshake.query
 
 	const hex = /^(?:[0-9A-Fa-f]{24}|[0-9]{1,19}|[A-Fa-f0-9]{24})$/
 	if (!hex.test(chatId)) {
@@ -37,12 +37,17 @@ const connection = async socket => {
 	}
 
 	const isUserInRoom = chatRoom.users.some(user => user._id.equals(userId))
+
 	if (!isUserInRoom) {
 		chatRoom.users.push(userId)
-		chatRoom.save()
+    await chatRoom.save()
 	}
 
 	await socket.join(chatId)
+
+  await chatRoom.populate('users')
+
+  console.log(chatRoom.users.length, userId);
 
 	const populateTitle =
 		chatRoom.users.length === 1
@@ -54,8 +59,10 @@ const connection = async socket => {
 
 	socket.emit('history', {
 		chat: { id: chatRoom._id, title: populateTitle },
-		messages: await privateServices.getChatHistory(chatId),
+		messages: await privateServices.getChatHistory(chatId) || [],
 	})
+
+  // socket.to(chatId)
 
 	socket.to(chatId).emit('user-connected', { title: user.userName })
 }
