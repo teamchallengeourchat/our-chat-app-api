@@ -39,6 +39,7 @@ const connection = async socket => {
 	const isUserInRoom = chatRoom.users.some(user => user._id.equals(userId))
 	if (!isUserInRoom) {
 		chatRoom.users.push(userId)
+		chatRoom.save()
 	}
 
 	await socket.join(chatId)
