@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose'
+import { MOOD_VARIANTS } from '../data/constants.js'
 
 export const User = model(
 		'users',
@@ -10,7 +11,7 @@ export const User = model(
 			},
 			userMood: {
 				type: String,
-				enum: ['1', '2', '3', '4', '5'],
+				enum: MOOD_VARIANTS,
 			},
 		},
 		{ versionKey: false, timestamps: true },
