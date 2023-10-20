@@ -8,7 +8,7 @@ import privateServices from '../services/privateServices.js'
 const errorCodes = {
 	unauthorized: 0,
 	deletedRoom: 1,
-	invalidRoomId: 2
+	invalidRoomId: 2,
 }
 
 const connection = async socket => {
@@ -35,10 +35,10 @@ const connection = async socket => {
 	history = history.map(({ _id, text, user, chatId, createdAt, userName }) => {
 		const newUser = {
 			_id: user?._id,
-			userName:user?.userName || userName,
-			userMood: user?.userMood
-		};
-		return { _id, text, chatId, createdAt,	user: newUser }
+			userName: user?.userName || userName,
+			userMood: user?.userMood,
+		}
+		return { _id, text, chatId, createdAt, user: newUser }
 	})
 
 	// console.log(roomId, history, user.userName);
@@ -63,9 +63,4 @@ const endWrite = async (socket, { chatId, userName }) => {
 	socket.to(chatId).emit('user-end-write', { userName })
 }
 
-export {
-	connection,
-	sendMessage,
-	startWrite,
-	endWrite,
-}
+export { connection, sendMessage, startWrite, endWrite }
