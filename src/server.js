@@ -67,4 +67,4 @@ export const io = new Server(httpServer, {
 privatesSocketRouter(io)
 roomsChatRouter(io)
 
-httpServer.listen(PORT || 5000, () => console.log(`Listening at Port ${PORT}`);
+httpServer.listen(PORT || 5000, () => console.log(`Listening at Port ${PORT}`));
