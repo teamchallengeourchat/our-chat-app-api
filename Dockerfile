@@ -3,9 +3,9 @@ FROM node:18.18
 ENV MONGO_DB_USERNAME=admin \
   MONGO_DB_PWD=password
 
-RUN mkdir -p /home/app
+RUN mkdir -p ./app
 
-COPY . /home/app
+COPY . /app
 
-CMD ["node", "/home/app/src/server.js"]
+CMD ["node", "./app/src/server.js"]
 
