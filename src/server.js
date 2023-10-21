@@ -56,6 +56,7 @@ const httpServer = http.createServer(app)
 export const io = new Server(httpServer, {
 	cors: {
 		origin: corsOrigin,
+		credentials: true,
 		optionsSuccessStatus: 200,
 	},
 })
