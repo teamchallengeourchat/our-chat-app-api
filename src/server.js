@@ -26,7 +26,11 @@ const PORT = process.env.SERVER_PORT || 8080
 
 dbConnect()
 
-const corsOrigin = '*'
+const corsOrigin = [
+	'https://our-chat-app-two.vercel.app',
+	'http://localhost:3000',
+	'http://localhost:3001',
+]
 
 // Set up the express application
 app.use(bodyParser.json({ limit: '30mb', extended: true }))
@@ -56,7 +60,6 @@ const httpServer = http.createServer(app)
 export const io = new Server(httpServer, {
 	cors: {
 		origin: corsOrigin,
-		credentials: true,
 		optionsSuccessStatus: 200,
 	},
 })
