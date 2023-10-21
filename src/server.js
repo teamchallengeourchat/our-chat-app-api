@@ -56,8 +56,7 @@ app.use('/user', userRouter)
 // Necessary to resolve server crash when an error occurs
 app.use(errorsMidleware)
 
-const httpServer = http.createServer(app)
-export const io = new Server(httpServer, {
+export const io = new Server(app, {
 	cors: {
 		origin: corsOrigin,
 		optionsSuccessStatus: 200,
