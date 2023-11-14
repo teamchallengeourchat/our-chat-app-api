@@ -9,10 +9,16 @@ const errorCodes = {
 	unauthorized: 0,
 	deletedRoom: 1,
 	invalidRoomId: 2,
+	roomIdNotExist: 3,
 }
 
 const connection = async socket => {
 	const { userId, roomId } = socket.handshake?.query
+
+	if (roomId === undefined) {
+		socket.emit('error', errorCodes.roomIdNotExist)
+		return
+	}
 
 	if (!['news', 'general', 'dating', 'business', 'work'].includes(roomId)) {
 		socket.emit('error', errorCodes.invalidRoomId)
@@ -30,7 +36,7 @@ const connection = async socket => {
 
 	await socket.join(roomId)
 
-	let history = await privateServices.getRoomHistory(roomId) || []
+	let history = (await privateServices.getRoomHistory(roomId)) || []
 
 	history = history.map(({ _id, text, user, chatId, createdAt, userName }) => {
 		const newUser = {
@@ -40,8 +46,6 @@ const connection = async socket => {
 		}
 		return { _id, text, chatId, createdAt, user: newUser }
 	})
-
-	// console.log(roomId, history, user.userName);
 
 	socket.emit('history', { messages: history })
 	socket.to(roomId).emit('user-connected', { title: user.userName })

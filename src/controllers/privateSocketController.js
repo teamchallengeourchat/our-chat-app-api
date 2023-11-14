@@ -10,10 +10,16 @@ const errorCodes = {
 	unauthorized: 0,
 	deletedChat: 1,
 	invalidChatId: 2,
+	chatIdNotExist: 3,
 }
 
 const connection = async socket => {
 	const { userId, chatId } = socket.handshake.query
+
+	if (chatId === undefined) {
+		socket.emit('error', errorCodes.chatIdNotExist)
+		return
+	}
 
 	const hex = /^(?:[0-9A-Fa-f]{24}|[0-9]{1,19}|[A-Fa-f0-9]{24})$/
 	if (!hex.test(chatId)) {
@@ -40,14 +46,14 @@ const connection = async socket => {
 
 	if (!isUserInRoom) {
 		chatRoom.users.push(userId)
-    await chatRoom.save()
+		await chatRoom.save()
 	}
 
 	await socket.join(chatId)
 
-  await chatRoom.populate('users')
+	await chatRoom.populate('users')
 
-  console.log(chatRoom.users.length, userId);
+	console.log(chatRoom.users.length, userId)
 
 	const populateTitle =
 		chatRoom.users.length === 1
@@ -59,10 +65,10 @@ const connection = async socket => {
 
 	socket.emit('history', {
 		chat: { id: chatRoom._id, title: populateTitle },
-		messages: await privateServices.getChatHistory(chatId) || [],
+		messages: (await privateServices.getChatHistory(chatId)) || [],
 	})
 
-  // socket.to(chatId)
+	// socket.to(chatId)
 
 	socket.to(chatId).emit('user-connected', { title: user.userName })
 }
