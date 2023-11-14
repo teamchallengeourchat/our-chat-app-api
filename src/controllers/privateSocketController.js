@@ -53,8 +53,6 @@ const connection = async socket => {
 
 	await chatRoom.populate('users')
 
-	console.log(chatRoom.users.length, userId)
-
 	const populateTitle =
 		chatRoom.users.length === 1
 			? 'Новий чат (зараз тут тільки ти)'
